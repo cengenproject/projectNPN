@@ -1,0 +1,43 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# projectNPN
+
+Projection and reverse transformation for nonparanormal and Zscore
+transformations, reusing parameters to project a new dataset on the same
+scale as previous one, or reverse the transformation into the original
+scale.
+
+## Installation
+
+You can install the development version of projectNPN from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("AlexWeinreb/projectNPN")
+```
+
+## Explanations on Z-score
+
+We have data following a given distribution, e.g. $N(12, 5)$. We can
+apply a Z-score transformation (subtracting the mean and dividing by the
+sd) to obtain transformed data that follows $N(0,1)$. Here, the mean and
+the sd are parameters of the transformation, and we are interested in
+switching between the “raw scale” $N(12,5)$ and the “transformed scale”
+$N(0,1)$.
+
+What this package implements is a Z-score, returning the original mean
+and sd along with the transformed data. This allows two things: first,
+we can now have a new dataset from the same distribution and transform
+it into the same scale as the first dataset, without computing
+statistics on it. Second, we can now reverse the transformation, given
+the transformed data and the original mean and sd.
+
+## More details
+
+While the Z-score is an intuitive example, we also implement the same
+method for the NPN transform (from the `{huge}` package).
+
+The functions here expect the data to be provided in matrices, and
+operate on each column of the matrix as a separate variable.

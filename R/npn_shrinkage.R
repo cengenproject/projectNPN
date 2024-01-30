@@ -41,6 +41,25 @@ project_rank <- function(vec_to_transform, original_vec){
 
 
 
+#' Transformation NPN by shrunken ECDF
+#' 
+#' Reimplements `huge::huge.npn(npn.func = "shrinkage")`, but returning the parameters.
+#' 
+#' Note that, if the new matrix has values outside of the reference range, they will be clipped.
+#' 
+#' @param mat The matrix to transform.
+#' @param parameters If `NULL`, perform the transformation as `huge.npn()`; if not `NULL`, reuse the parameters to project `mat` onto the same scale.
+#'
+#' @return A list with two elements: `mat_trans` is the transformed matrix, `parameters` is a list of parameters that can be reused.
+#' @export
+#'
+#' 
+#' 
+#' @examples
+#' x <- matrix(c(1, 12, 20.5), ncol = 1)
+#' y <- matrix(c(12.2, 18), ncol = 1)
+#' x_transformed <- transform_npn_shrinkage(x)
+#' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
 transform_npn_shrinkage <- function(mat, parameters = NULL){
   
   if(!is.null(parameters)){
@@ -67,14 +86,17 @@ transform_npn_shrinkage <- function(mat, parameters = NULL){
     }
     dimnames(mat_trans) <- dimnames(mat)
     mat_trans <- mat_trans/(nrow(parameters$reference_mat) + 1)
+    
+    # for export
+    mat <- parameters$reference_mat
   }
   
-  mat_trans <- qnorm(mat_trans)
+  mat_trans <- stats::qnorm(mat_trans)
   
   if(params_given){
     sd_first_col <- parameters$sd_first_col
   } else{
-    sd_first_col <- sd(mat_trans[, 1])
+    sd_first_col <- stats::sd(mat_trans[, 1])
   }
   mat_trans = mat_trans/sd_first_col
   
@@ -103,6 +125,29 @@ rev_project_rank <- function(rk_y, x_reference){
 
 
 
+#' Reverse NPN (shrunken ECDF) transformation
+#'
+#' Compute the reverse of the nonparanormal transformation (with shrunken ECDF)
+#' Note that, if the matrix to be reverse transformed has values outside of the reference parameters, they will be clipped.
+#'
+#' @param mat_trans Transformed matrix
+#' @param parameters Parameters of the transformation
+#'
+#' @return The matrix before transformation
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' # Reverse a previous transformation
+#' my_mat <- matrix(rnorm(6, 10, 1), ncol = 2)
+#' transformed_mat <- transform_npn_shrinkage(my_mat)
+#' rev_npn_shrinkage(transformed_mat$mat, transformed_mat$parameters)
+#' 
+#' # Given a matrix in NPN scale, project it back onto original scale
+#' y <- matrix(c(-0.5, 0.2), ncol =1)
+#' rev_npn_shrinkage(y, transformed_mat$parameters)
 rev_npn_shrinkage <- function(mat_trans, parameters = NULL){
   
   
@@ -114,7 +159,7 @@ rev_npn_shrinkage <- function(mat_trans, parameters = NULL){
   ))
   
   mat <- parameters$sd_first_col * mat_trans
-  mat <- pnorm(mat)
+  mat <- stats::pnorm(mat)
   mat <- mat * (nrow(parameters$reference_mat) + 1)
   
   

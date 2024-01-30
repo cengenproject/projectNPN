@@ -1,5 +1,11 @@
-# Takes a matrix (of SF or PSI in training set), transform it and
-# also return the transformation parameters
+#' Z score transformation also returning the transformation parameters
+#'
+#' @param mat Matrix to transform (transforming each column)
+#' @param parameters If not `NULL`, project onto the scale defined by those parameters
+#'
+#' @return A list with two components: the transformed matrix and the parameters
+#' @export
+#'
 transform_zscore <- function(mat, parameters = NULL){
   if(!is.null(parameters)){
     stopifnot(identical(names(parameters),
@@ -19,6 +25,14 @@ transform_zscore <- function(mat, parameters = NULL){
   list(mat = mat, parameters = parameters)
 }
 
+#' Reverse Z-score transformation
+#'
+#' @param mat_trans Transformed matrix
+#' @param parameters The transformation parameters
+#'
+#' @return The original matrix (untransformed)
+#' @export
+#'
 reverse_transform_zscore <- function(mat_trans, parameters = NULL){
   stopifnot(identical(names(parameters),
                       c("means", "sds")))
