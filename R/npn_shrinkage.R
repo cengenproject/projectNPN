@@ -1,5 +1,6 @@
 
-which_smallest_positive <- function(a){
+which_smallest_positive <- function(a, tol = 1e-10){
+  a <- round(a, -log10(tol))
   if(all(a <= 0 | is.na(a))){
     positive_min <- 0
   } else{
@@ -35,7 +36,7 @@ transform_one_value <- function(y1, x){
 }
 
 project_rank <- function(vec_to_transform, original_vec){
-  map_dbl(vec_to_transform, transform_one_value, original_vec)
+  purrr::map_dbl(vec_to_transform, transform_one_value, original_vec)
 }
 
 
@@ -97,6 +98,33 @@ rev_transform_one_rank <- function(r1, x){
 }
 
 rev_project_rank <- function(rk_y, x_reference){
-  map_dbl(rk_y, rev_transform_one_rank, x_reference)
+  purrr::map_dbl(rk_y, rev_transform_one_rank, x_reference)
+}
+
+
+
+rev_npn_shrinkage <- function(mat_trans, parameters = NULL){
+  
+  
+  stopifnot(identical( names(parameters),
+                       c("reference_mat", "sd_first_col")
+  ))
+  stopifnot(identical( colnames(mat_trans),
+                       colnames(parameters$reference_mat)
+  ))
+  
+  mat <- parameters$sd_first_col * mat_trans
+  mat <- pnorm(mat)
+  mat <- mat * (nrow(parameters$reference_mat) + 1)
+  
+  
+  mat2 <- matrix(nrow = nrow(mat_trans),
+                      ncol = ncol(mat_trans))
+  for(col in seq_len(ncol(mat_trans))){
+    mat2[,col] <- rev_project_rank(mat[,col], parameters$reference_mat[,col])
+  }
+  dimnames(mat2) <- dimnames(mat_trans)
+  
+  mat2
 }
 
