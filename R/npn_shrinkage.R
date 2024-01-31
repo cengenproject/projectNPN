@@ -2,7 +2,7 @@
 which_smallest_positive <- function(a, tol = 1e-10){
   a <- round(a, -log10(tol))
   if(all(a <= 0 | is.na(a))){
-    positive_min <- 0
+    positive_min <- max(a[a<=0], na.rm = TRUE)
   } else{
     positive_min <- min(a[a>=0], na.rm = TRUE)
   }
@@ -109,7 +109,7 @@ transform_npn_shrinkage <- function(mat, parameters = NULL){
 
 
 rev_transform_one_rank <- function(r1, x){
-  rank_x <- rank(x)
+  rank_x <- rank(x, na.last = "keep")
   
   left_neighbor <- which_smallest_positive(r1 - rank_x)
   right_neighbor <- which_smallest_positive( -(r1 - rank_x))

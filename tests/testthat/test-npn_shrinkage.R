@@ -114,7 +114,30 @@ test_that("Reverse NPN shrinkage reverses", {
 })
 
 
-
+test_that("case when NA but no right neighbor",{
+  # simple example
+  y <- 69
+  x <- c(NA, 60, 62)
+  
+  r1 <- transform_one_value(y, x)
+  
+  expect_identical(rev_transform_one_rank(r1, x),
+                   62)
+  
+  # real-world case
+  x <- c(40, 25, 23, NA, NA, 35, NA, 34, NA, 82, 27, 49, 30, 41, NA, 21, 41, 39,
+         58, 87, NA, 79, 26, 28, 64, 29, NA, NA, 49, 57, 48, 34, 46, 17, NA, NA,
+         60, 58, 43, NA, 23, 38, 29, NA, NA, 68, 96, 57, 48, 33, 35, 34, 163, 33,
+         NA, 25, NA, NA, 18, 24, NA, 49, 72, 67, 41, 21, 30, NA, 59, 53, NA, 54,
+         18, 87, 101, 44, 36, NA, 76, 18, 60, 72, 49, 45, 23, 31, NA)
+  
+  y <- c(40.18265, 51.92735, 52.08953, 48.46981, 54.47920, 46.22498, 60.85448, 61.39052,
+         63.46165, 56.01044, 49.06763, 39.84031, 33.29314, 40.40567, 47.49379, 46.90773,
+         69.73150, 28.04920, 34.18040, 15.78615, 70.72878)
+  
+  expect_identical(rev_transform_one_rank(y[[17]], x),
+                   max(x, na.rm = TRUE))
+})
 
 
 
