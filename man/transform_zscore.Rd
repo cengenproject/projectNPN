@@ -4,12 +4,14 @@
 \alias{transform_zscore}
 \title{Z score transformation also returning the transformation parameters}
 \usage{
-transform_zscore(mat, parameters = NULL)
+transform_zscore(mat, parameters = NULL, fill_na = FALSE)
 }
 \arguments{
 \item{mat}{Matrix to transform (transforming each column)}
 
 \item{parameters}{If not \code{NULL}, project onto the scale defined by those parameters}
+
+\item{fill_na}{if FALSE, NAs in input stay NA in output without affecting the other values. If TRUE, NAs are replaced by 0 (i.e. the column mean).}
 }
 \value{
 A list with two components: the transformed matrix and the parameters

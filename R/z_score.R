@@ -2,11 +2,12 @@
 #'
 #' @param mat Matrix to transform (transforming each column)
 #' @param parameters If not `NULL`, project onto the scale defined by those parameters
+#' @param fill_na if FALSE, NAs in input stay NA in output without affecting the other values. If TRUE, NAs are replaced by 0 (i.e. the column mean).
 #'
 #' @return A list with two components: the transformed matrix and the parameters
 #' @export
 #'
-transform_zscore <- function(mat, parameters = NULL){
+transform_zscore <- function(mat, parameters = NULL, fill_na = FALSE){
   if(!is.null(parameters)){
     stopifnot(identical(names(parameters),
                         c("means", "sds")))
@@ -22,6 +23,9 @@ transform_zscore <- function(mat, parameters = NULL){
   
   if(!params_given) parameters$sds <- matrixStats::colSds(mat, na.rm = TRUE)
   mat <- sweep(mat, 2L, parameters$sds, `/`)
+  
+  if(fill_na) mat[is.na(mat)] <- 0
+  
   list(mat = mat, parameters = parameters)
 }
 
