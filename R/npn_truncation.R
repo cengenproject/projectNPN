@@ -1,5 +1,23 @@
 
 
+#' Transformation NPN by truncation
+#' 
+#' Reimplements `huge::huge.npn(npn.func = "truncation")`, but returning the parameters.
+#' 
+#' Note that, if the new matrix has values close to limits of the reference range, they will be clipped.
+#'
+#' @param mat The matrix to transform.
+#' @param trunc.thresh The threshold.
+#' @param parameters If `NULL`, perform the transformation as `huge.npn()`; if not `NULL`, reuse the parameters to project `mat` onto the same scale.
+#'
+#' @return A list with two elements: `mat` is the transformed matrix, `parameters` is a list of parameters that can be reused.
+#' @export
+#'
+#' @examples
+#' x <- matrix(c(1, 12, 20.5), ncol = 1)
+#' y <- matrix(c(12.2, 18), ncol = 1)
+#' x_transformed <- transform_npn_shrinkage(x)
+#' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
 transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL){
   
   
@@ -64,3 +82,62 @@ transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL
   
   list(mat = mat_trans, parameters = parameters)
 }
+
+
+
+
+
+
+#' Reverse NPN (truncation) transformation
+#'
+#' Compute the reverse of the nonparanormal transformation (with truncation)
+#' Note that, if the matrix to be reverse transformed has close to the limits of the reference parameters, they will be clipped.
+#'
+#'
+#' @param mat_trans Transformed matrix
+#' @param parameters Parameters of the transformation
+#'
+#' @return The matrix before transformation
+#' @export
+#'
+#' @examples
+#' # Reverse a previous transformation
+#' my_mat <- matrix(rnorm(6, 10, 1), ncol = 2)
+#' transformed_mat <- transform_npn_shrinkage(my_mat)
+#' rev_npn_shrinkage(transformed_mat$mat, transformed_mat$parameters)
+#' 
+#' # Given a matrix in NPN scale, project it back onto original scale
+#' y <- matrix(c(-1, 1), ncol = 1)
+#' rev_npn_shrinkage(y, transformed_mat$parameters)
+rev_npn_truncation <- function(mat_trans, parameters = NULL){
+  
+  
+  stopifnot(identical( names(parameters),
+                       c("reference_mat", "sd_first_col")
+  ))
+  stopifnot(identical( colnames(mat_trans),
+                       colnames(parameters$reference_mat)
+  ))
+  
+  mat <- parameters$sd_first_col * mat_trans
+  mat <- stats::pnorm(mat)
+  mat <- mat * nrow(parameters$reference_mat)
+  
+  
+  mat2 <- matrix(nrow = nrow(mat_trans),
+                 ncol = ncol(mat_trans))
+  for(col in seq_len(ncol(mat_trans))){
+    mat2[,col] <- rev_project_rank(mat[,col], parameters$reference_mat[,col])
+  }
+  dimnames(mat2) <- dimnames(mat_trans)
+  
+  mat2
+}
+
+
+
+
+
+
+
+

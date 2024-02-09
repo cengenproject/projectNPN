@@ -13,6 +13,23 @@ test_that("NPN truncation simple case", {
 })
 
 
+test_that("NPN truncation keeps names", {
+  
+  mat <- matrix(1:6, ncol = 2,
+                dimnames = list(letters[1:3],
+                                LETTERS[1:2]))
+  
+  expect_equal(dimnames(mat),
+               dimnames(transform_npn_truncation(mat)$mat))
+  
+  
+  mat <- create_test_mat_sf()
+  
+  expect_equal(dimnames(mat),
+               dimnames(transform_npn_truncation(mat)$mat))
+})
+
+
 
 test_that("NPN truncation threshold parameter used",{
   
@@ -142,6 +159,74 @@ test_that("NPN trunc our parameters are taken into account",{
 
 
 
+
+test_that("Reverse NPN trunc reverses", {
+  
+  # Note: because of the truncation, the highest value can never be exactly recovered.
+  # A workaround would be without truncation (threshold = 0), but since we're dividing
+  # by nrow (and not nrow+1 as in shrinkage), the highest rank stays at 1, its qnorm is Inf,
+  # and the sd_first_column is NaN
+  # 
+  # So here we test by removing the top value
+  
+  # in this example, the top value is on the last row
+  mat <- matrix(1:6 * 1., ncol = 2,
+                dimnames = list(letters[1:3],
+                                LETTERS[1:2]))
+  
+  expect_identical((mat |>
+                      transform_npn_truncation() |>
+                      do.call(rev_npn_truncation, args = _))[1:2,],
+                   mat[1:2,])
+  
+  
+  
+  # for this example, we add a new highest value on the first row
+  mat_sf <- create_test_mat_sf()
+  
+  mat_sf <- rbind(apply(mat_sf, 2L, max) + 1,
+                  mat_sf)
+  
+  
+  
+  expect_identical((mat_sf |>
+                      transform_npn_truncation() |>
+                      do.call(rev_npn_truncation, args = _))[-1,],
+                   mat_sf[-1,])
+})
+
+
+
+
+
+
+test_that("Reverse NPN trunc projects new values", {
+  
+  # reference vector, ensure the first and last values are the only ones truncated
+  vec_ref <- runif(100, -50, 50) |>
+    c(rep(-100, 10), rep(100, 10)) |>
+    sort()
+  mat_ref <- matrix(vec_ref, ncol = 1)
+  
+  trans <- transform_npn_truncation(mat_ref)
+  
+  # new data: intercalate between reference values
+  vec_trans <- trans$mat[11:109,1]
+  vec_intercalated <- vec_trans[-length(vec_trans)] + diff(vec_trans)/2
+  new_data_intercalated <- matrix(vec_intercalated, ncol = 1)
+  
+  raw_intercalated <- rev_npn_truncation(new_data_intercalated,
+                                         parameters = trans$parameters)
+  
+  # intercalated and reverse transformed should be in order
+  expect_identical(order(raw_intercalated),
+                   seq_along(raw_intercalated))
+  
+  # should still be intercalated
+  expect_true( all(vec_intercalated < vec_trans[-1]) )
+  expect_true( all(vec_intercalated > vec_trans[-length(vec_trans)]) )
+  
+})
 
 
 
