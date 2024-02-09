@@ -1,4 +1,4 @@
-test_that("npn simple cases",{
+test_that("NPN shrinkage simple cases",{
   mat <- matrix(1:6, ncol = 2)
   
   expect_identical(transform_npn_shrinkage(mat)$mat,
@@ -6,7 +6,7 @@ test_that("npn simple cases",{
   
 })
 
-test_that("npn column of 0",{
+test_that("NPN shrinkage column of 0",{
   mat <- matrix(c(1:6, 0,0,0), ncol = 3)
   
   expect_identical(transform_npn_shrinkage(mat)$mat,
@@ -16,7 +16,7 @@ test_that("npn column of 0",{
   
 })
 
-test_that("npn does same as {huge}",{
+test_that("NPN shrinkage does same as {huge}",{
   
   mat_psi <- create_test_mat_psi()
   mat_sf <- create_test_mat_sf()
@@ -29,7 +29,7 @@ test_that("npn does same as {huge}",{
 })
 
 
-test_that("we can reuse parameters",{
+test_that("NPN skrinkage can reuse parameters",{
   mat_sf <- create_test_mat_sf()
   
   bb <- transform_npn_shrinkage(mat_sf)
@@ -50,7 +50,7 @@ test_that("we can reuse parameters",{
 })
 
 
-test_that("we can transform a single row",{
+test_that("NPN skrinkage can transform a single row",{
   
   mat_psi_train <- create_test_mat_psi()
   mat_psi_test <- create_test_mat_psi()
@@ -67,7 +67,7 @@ test_that("we can transform a single row",{
   # points(log10(mat_psi_test[5,]), aa, col = 'red')
 })
 
-test_that("our parameters are taken into account",{
+test_that("NPN skrinkage our parameters are taken into account",{
   rndm_mat_tests <- matrix(1:3, nrow = 1)
   expect_identical(transform_npn_shrinkage(rndm_mat_tests,
                                     parameters = list(reference_mat = matrix(rep(1:3, 3), nrow = 3),
@@ -131,7 +131,7 @@ test_that("Reverse NPN shrinkage reverses", {
 })
 
 
-test_that("case when NA but no right neighbor",{
+test_that("NPN skrinkage case when NA but no right neighbor",{
   # simple example
   y <- 69
   x <- c(NA, 60, 62)
