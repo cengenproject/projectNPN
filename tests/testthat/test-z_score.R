@@ -7,6 +7,23 @@ test_that("Zscore basic example",{
                matrix(c(-1,0,1) |> rep(2), ncol = 2))
 })
 
+test_that("Zscore column of 0",{
+  mat <- matrix(c(1,   2,  3,
+                  1.5, 2, 2.5,
+                  0,   0,  0), ncol = 3)
+  
+  # not filling NA: we keep the NaNs
+  expect_identical(transform_zscore(mat)$mat,
+                   matrix(c(-1,0,1,
+                            -1,0,1,
+                            NaN, NaN, NaN), ncol = 3))
+  
+  expect_identical(transform_zscore(mat, fill_na = TRUE)$mat,
+                   matrix(c(-1,0,1,
+                            -1,0,1,
+                            0,0,0), ncol = 3))
+})
+
 
 test_that("Zscore does same as scale()",{
   

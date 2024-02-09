@@ -1,3 +1,20 @@
+test_that("npn simple cases",{
+  mat <- matrix(1:6, ncol = 2)
+  
+  expect_identical(transform_npn_shrinkage(mat)$mat,
+                   matrix(c(-1,0,1) |> rep(2), ncol = 2))
+  
+})
+
+test_that("npn column of 0",{
+  mat <- matrix(c(1:6, 0,0,0), ncol = 3)
+  
+  expect_identical(transform_npn_shrinkage(mat)$mat,
+                   matrix(c(-1,0,1,
+                            -1,0,1,
+                            0,0,0), ncol = 3))
+  
+})
 
 test_that("npn does same as {huge}",{
   
