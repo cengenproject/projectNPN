@@ -75,32 +75,35 @@ transform_npn_shrinkage <- function(mat, parameters = NULL){
     params_given <- FALSE
   }
   
+  
   if(! params_given){
+    
     mat_trans <- apply(mat, 2, rank)
-    mat_trans <- mat_trans/(nrow(mat_trans) + 1)
+    
+    parameters$reference_mat <- mat
+    
   } else{
+    
     mat_trans <- matrix(nrow = nrow(mat),
                         ncol = ncol(mat))
     for(col in seq_len(ncol(mat))){
       mat_trans[,col] <- project_rank(mat[,col], parameters$reference_mat[,col])
     }
     dimnames(mat_trans) <- dimnames(mat)
-    mat_trans <- mat_trans/(nrow(parameters$reference_mat) + 1)
     
-    # for export
-    mat <- parameters$reference_mat
   }
   
+  
+  mat_trans <- mat_trans/(nrow(parameters$reference_mat) + 1)
   mat_trans <- stats::qnorm(mat_trans)
   
-  if(params_given){
-    sd_first_col <- parameters$sd_first_col
-  } else{
-    sd_first_col <- stats::sd(mat_trans[, 1])
+  if(! params_given){
+    parameters$sd_first_col <- stats::sd(mat_trans[, 1])
   }
-  mat_trans = mat_trans/sd_first_col
   
-  list(mat = mat_trans, parameters = list(reference_mat = mat, sd_first_col = sd_first_col))
+  mat_trans = mat_trans/parameters$sd_first_col
+  
+  list(mat = mat_trans, parameters = parameters)
 }
 
 
