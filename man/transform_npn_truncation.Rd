@@ -4,24 +4,40 @@
 \alias{transform_npn_truncation}
 \title{Transformation NPN by truncation}
 \usage{
-transform_npn_truncation(mat, trunc.thresh = NULL, parameters = NULL)
+transform_npn_truncation(
+  mat,
+  parameters = NULL,
+  trunc.thresh = NULL,
+  na = c("refuse", "last")
+)
 }
 \arguments{
 \item{mat}{The matrix to transform.}
 
+\item{parameters}{If \code{NULL}, perform the transformation as \code{huge.npn()}; if not \code{NULL}, reuse the parameters to project \code{mat} onto the same scale.}
+
 \item{trunc.thresh}{The threshold.}
 
-\item{parameters}{If \code{NULL}, perform the transformation as \code{huge.npn()}; if not \code{NULL}, reuse the parameters to project \code{mat} onto the same scale.}
+\item{na}{How to treat NAs in input}
 }
 \value{
 A list with two elements: \code{mat} is the transformed matrix, \code{parameters} is a list of parameters that can be reused.
 }
 \description{
-Reimplements \code{huge::huge.npn(npn.func = "truncation")}, but returning the parameters.
+Reimplements \code{huge::huge.npn(npn.func = "truncation")}, but returning the parameters. Note that, if the new matrix has values close to limits of the reference range, they will be clipped.
 }
-\details{
-Note that, if the new matrix has values close to limits of the reference range, they will be clipped.
+\section{NA handling}{
+
+
+The \code{na} argument specifies what to do when there are \code{NA} in the input matrix.
+The default is "refuse": the function stops with an error; a suitable way
+to deal with it is to remove \code{NA}s (e.g. by imputation) before passing the matrix
+to the transformation. Other options incluse "keep", so the transformed matrix contains
+\code{NA} where the input matrix did, "center" which gives an "average" value to the \code{NA}s,
+or "last" which gives the highest possible value to the \code{NA}s (which is the default
+behavior in the \code{{huge}} package).
 }
+
 \examples{
 x <- matrix(c(1, 12, 20.5), ncol = 1)
 y <- matrix(c(12.2, 18), ncol = 1)

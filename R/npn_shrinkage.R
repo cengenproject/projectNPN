@@ -43,12 +43,14 @@ project_rank <- function(vec_to_transform, original_vec){
 
 #' Transformation NPN by shrunken ECDF
 #' 
-#' Reimplements `huge::huge.npn(npn.func = "shrinkage")`, but returning the parameters.
+#' Reimplements `huge::huge.npn(npn.func = "shrinkage")`, but returning the parameters. Note that, if the new matrix has values outside of the reference range, they will be clipped.
 #' 
-#' Note that, if the new matrix has values outside of the reference range, they will be clipped.
+#' 
+#' @inheritSection transform_zscore NA handling
 #' 
 #' @param mat The matrix to transform.
 #' @param parameters If `NULL`, perform the transformation as `huge.npn()`; if not `NULL`, reuse the parameters to project `mat` onto the same scale.
+#' @param na How to treat NAs in input
 #'
 #' @return A list with two elements: `mat_trans` is the transformed matrix, `parameters` is a list of parameters that can be reused.
 #' @export
@@ -60,7 +62,13 @@ project_rank <- function(vec_to_transform, original_vec){
 #' y <- matrix(c(12.2, 18), ncol = 1)
 #' x_transformed <- transform_npn_shrinkage(x)
 #' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
-transform_npn_shrinkage <- function(mat, parameters = NULL){
+transform_npn_shrinkage <- function(mat, parameters = NULL, na = c("refuse", "last")){
+  
+  
+  na <- match.arg(na)
+  if(na == "refuse" && any(is.na(mat))){
+    stop("The matrix contains NA values.")
+  }
   
   if(!is.null(parameters)){
     stopifnot(identical( names(parameters),
@@ -130,11 +138,13 @@ rev_project_rank <- function(rk_y, x_reference){
 
 #' Reverse NPN (shrunken ECDF) transformation
 #'
-#' Compute the reverse of the nonparanormal transformation (with shrunken ECDF)
-#' Note that, if the matrix to be reverse transformed has values outside of the reference parameters, they will be clipped.
+#' Compute the reverse of the nonparanormal transformation (with shrunken ECDF). Note that, if the matrix to be reverse transformed has values outside of the reference parameters, they will be clipped.
 #'
+#' @inheritSection transform_zscore NA handling
+#' 
 #' @param mat_trans Transformed matrix
 #' @param parameters Parameters of the transformation
+#' @param na How to treat NAs in input
 #'
 #' @return The matrix before transformation
 #' 
@@ -146,13 +156,18 @@ rev_project_rank <- function(rk_y, x_reference){
 #' # Reverse a previous transformation
 #' my_mat <- matrix(rnorm(6, 10, 1), ncol = 2)
 #' transformed_mat <- transform_npn_shrinkage(my_mat)
-#' rev_npn_shrinkage(transformed_mat$mat, transformed_mat$parameters)
+#' reverse_npn_shrinkage(transformed_mat$mat, transformed_mat$parameters)
 #' 
 #' # Given a matrix in NPN scale, project it back onto original scale
 #' y <- matrix(c(-0.5, 0.2), ncol =1)
-#' rev_npn_shrinkage(y, transformed_mat$parameters)
-rev_npn_shrinkage <- function(mat_trans, parameters = NULL){
+#' reverse_npn_shrinkage(y, transformed_mat$parameters)
+reverse_npn_shrinkage <- function(mat_trans, parameters = NULL, na = c("refuse")){
   
+  
+  na <- match.arg(na)
+  if(na == "refuse" && any(is.na(mat_trans))){
+    stop("The matrix contains NA values.")
+  }
   
   stopifnot(identical( names(parameters),
                        c("reference_mat", "sd_first_col")

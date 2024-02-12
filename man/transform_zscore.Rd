@@ -4,14 +4,14 @@
 \alias{transform_zscore}
 \title{Z score transformation also returning the transformation parameters}
 \usage{
-transform_zscore(mat, parameters = NULL, fill_na = FALSE)
+transform_zscore(mat, parameters = NULL, na = c("refuse", "keep", "center"))
 }
 \arguments{
 \item{mat}{Matrix to transform (transforming each column)}
 
 \item{parameters}{If not \code{NULL}, project onto the scale defined by those parameters}
 
-\item{fill_na}{if FALSE, NAs in input stay NA in output without affecting the other values. If TRUE, NAs are replaced by 0 (i.e. the column mean).}
+\item{na}{How to treat NAs in input}
 }
 \value{
 A list with two components: the transformed matrix and the parameters
@@ -19,3 +19,15 @@ A list with two components: the transformed matrix and the parameters
 \description{
 Z score transformation also returning the transformation parameters
 }
+\section{NA handling}{
+
+
+The \code{na} argument specifies what to do when there are \code{NA} in the input matrix.
+The default is "refuse": the function stops with an error; a suitable way
+to deal with it is to remove \code{NA}s (e.g. by imputation) before passing the matrix
+to the transformation. Other options incluse "keep", so the transformed matrix contains
+\code{NA} where the input matrix did, "center" which gives an "average" value to the \code{NA}s,
+or "last" which gives the highest possible value to the \code{NA}s (which is the default
+behavior in the \code{{huge}} package).
+}
+

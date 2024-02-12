@@ -4,12 +4,18 @@
 \alias{reverse_transform_zscore}
 \title{Reverse Z-score transformation}
 \usage{
-reverse_transform_zscore(mat_trans, parameters = NULL)
+reverse_transform_zscore(
+  mat_trans,
+  parameters = NULL,
+  na = c("refuse", "ignore")
+)
 }
 \arguments{
 \item{mat_trans}{Transformed matrix}
 
 \item{parameters}{The transformation parameters}
+
+\item{na}{How to treat NAs in input}
 }
 \value{
 The original matrix (untransformed)
@@ -17,3 +23,15 @@ The original matrix (untransformed)
 \description{
 Reverse Z-score transformation
 }
+\section{NA handling}{
+
+
+The \code{na} argument specifies what to do when there are \code{NA} in the input matrix.
+The default is "refuse": the function stops with an error; a suitable way
+to deal with it is to remove \code{NA}s (e.g. by imputation) before passing the matrix
+to the transformation. Other options incluse "keep", so the transformed matrix contains
+\code{NA} where the input matrix did, "center" which gives an "average" value to the \code{NA}s,
+or "last" which gives the highest possible value to the \code{NA}s (which is the default
+behavior in the \code{{huge}} package).
+}
+

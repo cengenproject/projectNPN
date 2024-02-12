@@ -61,21 +61,35 @@ test_that("NPN trunc column of 0",{
 })
 
 
+test_that("NPN trunc handles NA when 'refuse",{
+  
+  # Default: refuse NA
+  expect_error(transform_npn_truncation(matrix(c(1,2, NA), ncol = 1)),
+               "The matrix contains NA values.")
+  
+})
 
 test_that("NPN trunc handles NA",{
   
+  
   # simple case: NA at the end (highest rank)
-  expect_identical(transform_npn_truncation(matrix(c(1,2, NA), ncol = 1))$mat,
-                   transform_npn_truncation(matrix(c(1,2, 3), ncol = 1))$mat)
+  expect_identical(transform_npn_truncation(matrix(c(1,2, NA), ncol = 1),
+                                            na = "last")$mat,
+                   transform_npn_truncation(matrix(c(1,2, 3), ncol = 1),
+                                            na = "last")$mat)
   
   
-  expect_identical(transform_npn_truncation(matrix(c(NA,2,3), ncol = 1))$mat,
-                   transform_npn_truncation(matrix(c(4, 2,3), ncol = 1))$mat)
+  expect_identical(transform_npn_truncation(matrix(c(NA,2,3), ncol = 1),
+                                            na = "last")$mat,
+                   transform_npn_truncation(matrix(c(4, 2,3), ncol = 1),
+                                            na = "last")$mat)
   
   
   mat_psi <- create_test_mat_psi()
   
-  expect_identical(transform_npn_truncation(mat_psi)$mat,
+  # Whith NA last, same behavior as default huge NPN
+  expect_identical(transform_npn_truncation(mat_psi,
+                                            na = "last")$mat,
                    huge::huge.npn(mat_psi, npn.func = "truncation", verbose = FALSE))
   
 })
@@ -96,8 +110,11 @@ test_that("NPN trunc can reuse parameters",{
   # with na: not an exact match, the huge function gives increasing ranks to each NA, I give them all the same rank
   mat_psi <- create_test_mat_psi()
   
-  bb <- transform_npn_truncation(mat_psi)
-  aa <- transform_npn_truncation(mat_psi, parameters = bb$parameters)
+  bb <- transform_npn_truncation(mat_psi,
+                                 na = "last")
+  aa <- transform_npn_truncation(mat_psi,
+                                 parameters = bb$parameters,
+                                 na = "last")
   
   expect_identical(bb$mat[!is.na(mat_psi)],
                    aa$mat[!is.na(mat_psi)])
@@ -113,9 +130,11 @@ test_that("NPN trunc can transform a single row",{
   mat_psi_test <- create_test_mat_psi()
   colnames(mat_psi_test) <- colnames(mat_psi_train)
   
-  bb <- transform_npn_truncation(mat_psi_train)
+  bb <- transform_npn_truncation(mat_psi_train,
+                                 na = "last")
   expect_no_condition(transform_npn_truncation(mat_psi_test[5,,drop=FALSE],
-                                               parameters = bb$parameters)$mat)
+                                               parameters = bb$parameters,
+                                               na = "last")$mat)
   
   # visual check
   # aa <- transform_npn_truncation(mat_psi_test[5,,drop=FALSE], parameters = bb$parameters)$mat
@@ -176,7 +195,7 @@ test_that("Reverse NPN trunc reverses", {
   
   expect_identical((mat |>
                       transform_npn_truncation() |>
-                      do.call(rev_npn_truncation, args = _))[1:2,],
+                      do.call(reverse_npn_truncation, args = _))[1:2,],
                    mat[1:2,])
   
   
@@ -191,12 +210,22 @@ test_that("Reverse NPN trunc reverses", {
   
   expect_identical((mat_sf |>
                       transform_npn_truncation() |>
-                      do.call(rev_npn_truncation, args = _))[-1,],
+                      do.call(reverse_npn_truncation, args = _))[-1,],
                    mat_sf[-1,])
 })
 
 
-
+test_that("Reverse NPN trunc refuses NA",{
+  mat <- matrix(c(NA,2:6 * 1.), ncol = 2,
+                dimnames = list(letters[1:3],
+                                LETTERS[1:2]))
+  
+  
+  
+  expect_error(reverse_npn_truncation(mat),
+               "The matrix contains NA values.")
+  
+})
 
 
 
@@ -215,7 +244,7 @@ test_that("Reverse NPN trunc projects new values", {
   vec_intercalated <- vec_trans[-length(vec_trans)] + diff(vec_trans)/2
   new_data_intercalated <- matrix(vec_intercalated, ncol = 1)
   
-  raw_intercalated <- rev_npn_truncation(new_data_intercalated,
+  raw_intercalated <- reverse_npn_truncation(new_data_intercalated,
                                          parameters = trans$parameters)
   
   # intercalated and reverse transformed should be in order

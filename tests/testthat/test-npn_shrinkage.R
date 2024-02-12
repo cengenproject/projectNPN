@@ -16,12 +16,21 @@ test_that("NPN shrinkage column of 0",{
   
 })
 
+test_that("NPN shrinkage handles NA when 'refuse",{
+  
+  # Default: refuse NA
+  expect_error(transform_npn_shrinkage(matrix(c(1,2, NA), ncol = 1)),
+               "The matrix contains NA values.")
+  
+})
+
+
 test_that("NPN shrinkage does same as {huge}",{
   
   mat_psi <- create_test_mat_psi()
   mat_sf <- create_test_mat_sf()
   
-  expect_identical(transform_npn_shrinkage(mat_psi)$mat,
+  expect_identical(transform_npn_shrinkage(mat_psi, na = "last")$mat,
             huge::huge.npn(mat_psi, verbose = FALSE))
   
   expect_identical(transform_npn_shrinkage(mat_sf)$mat,
@@ -39,8 +48,8 @@ test_that("NPN skrinkage can reuse parameters",{
   # with na: not an exact match, the huge function gives increasing ranks to each NA, I give them all the same rank
   mat_psi <- create_test_mat_psi()
   
-  bb <- transform_npn_shrinkage(mat_psi)
-  aa <- transform_npn_shrinkage(mat_psi, bb$parameters)
+  bb <- transform_npn_shrinkage(mat_psi, na = "last")
+  aa <- transform_npn_shrinkage(mat_psi, bb$parameters, na = "last")
   
   expect_identical(bb$mat[!is.na(mat_psi)],
                    aa$mat[!is.na(mat_psi)])
@@ -56,8 +65,10 @@ test_that("NPN skrinkage can transform a single row",{
   mat_psi_test <- create_test_mat_psi()
   colnames(mat_psi_test) <- colnames(mat_psi_train)
   
-  bb <- transform_npn_shrinkage(mat_psi_train)
-  expect_no_condition(transform_npn_shrinkage(mat_psi_test[5,,drop=FALSE], bb$parameters)$mat)
+  bb <- transform_npn_shrinkage(mat_psi_train, na = "last")
+  expect_no_condition(transform_npn_shrinkage(mat_psi_test[5,,drop=FALSE],
+                                              bb$parameters,
+                                              na = "last")$mat)
   
   # visual check
   # aa <- transform_npn_shrinkage(mat_psi_test[5,,drop=FALSE], bb$parameters)$mat
@@ -126,7 +137,7 @@ test_that("Reverse rank projection as expected", {
 test_that("Reverse NPN shrinkage reverses", {
   mat_sf <- create_test_mat_sf()
   
-  expect_identical(mat_sf |> transform_npn_shrinkage() |> do.call(rev_npn_shrinkage, args = _),
+  expect_identical(mat_sf |> transform_npn_shrinkage() |> do.call(reverse_npn_shrinkage, args = _),
                    mat_sf)
 })
 

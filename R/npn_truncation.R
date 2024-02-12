@@ -2,13 +2,15 @@
 
 #' Transformation NPN by truncation
 #' 
-#' Reimplements `huge::huge.npn(npn.func = "truncation")`, but returning the parameters.
-#' 
-#' Note that, if the new matrix has values close to limits of the reference range, they will be clipped.
+#' Reimplements `huge::huge.npn(npn.func = "truncation")`, but returning the parameters. Note that, if the new matrix has values close to limits of the reference range, they will be clipped.
 #'
+#'
+#' @inheritSection transform_zscore NA handling
+#' 
 #' @param mat The matrix to transform.
 #' @param trunc.thresh The threshold.
 #' @param parameters If `NULL`, perform the transformation as `huge.npn()`; if not `NULL`, reuse the parameters to project `mat` onto the same scale.
+#' @param na How to treat NAs in input
 #'
 #' @return A list with two elements: `mat` is the transformed matrix, `parameters` is a list of parameters that can be reused.
 #' @export
@@ -18,8 +20,12 @@
 #' y <- matrix(c(12.2, 18), ncol = 1)
 #' x_transformed <- transform_npn_shrinkage(x)
 #' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
-transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL){
+transform_npn_truncation <- function(mat, parameters = NULL, trunc.thresh = NULL, na = c("refuse", "last")){
   
+  na <- match.arg(na)
+  if(na == "refuse" && any(is.na(mat))){
+    stop("The matrix contains NA values.")
+  }
   
   if (is.null(trunc.thresh)){
     
@@ -69,8 +75,8 @@ transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL
   
   mat_trans <- mat_trans/nrow(parameters$reference_mat)
   
-  mat_trans <- qnorm(pmin(pmax(mat_trans, trunc.thresh), 
-                          1 - trunc.thresh))
+  mat_trans <- stats::qnorm(pmin(pmax(mat_trans, trunc.thresh), 
+                                 1 - trunc.thresh))
   
   
   if(! params_given){
@@ -94,8 +100,11 @@ transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL
 #' Note that, if the matrix to be reverse transformed has close to the limits of the reference parameters, they will be clipped.
 #'
 #'
+#' @inheritSection transform_zscore NA handling
+#' 
 #' @param mat_trans Transformed matrix
 #' @param parameters Parameters of the transformation
+#' @param na How to treat NAs in input
 #'
 #' @return The matrix before transformation
 #' @export
@@ -104,13 +113,17 @@ transform_npn_truncation <- function(mat, trunc.thresh = NULL, parameters = NULL
 #' # Reverse a previous transformation
 #' my_mat <- matrix(rnorm(6, 10, 1), ncol = 2)
 #' transformed_mat <- transform_npn_shrinkage(my_mat)
-#' rev_npn_shrinkage(transformed_mat$mat, transformed_mat$parameters)
+#' reverse_npn_truncation(transformed_mat$mat, transformed_mat$parameters)
 #' 
 #' # Given a matrix in NPN scale, project it back onto original scale
 #' y <- matrix(c(-1, 1), ncol = 1)
-#' rev_npn_shrinkage(y, transformed_mat$parameters)
-rev_npn_truncation <- function(mat_trans, parameters = NULL){
+#' reverse_npn_truncation(y, transformed_mat$parameters)
+reverse_npn_truncation <- function(mat_trans, parameters = NULL, na = "refuse"){
   
+  na <- match.arg(na)
+  if(na == "refuse" && any(is.na(mat_trans))){
+    stop("The matrix contains NA values.")
+  }
   
   stopifnot(identical( names(parameters),
                        c("reference_mat", "sd_first_col")
