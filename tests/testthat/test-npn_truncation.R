@@ -259,4 +259,26 @@ test_that("Reverse NPN trunc projects new values", {
 
 
 
+test_that("Reverse NPN trunc with NA", {
+  mat_psi <- create_test_mat_psi()
+  
+  # default should error
+  expect_error(transform_npn_truncation(mat_psi),
+               "The matrix contains NA values.")
+  
+  # using keep
+  expect_no_error(transform_npn_truncation(mat_psi, na = "keep"))
+  
+  trans <- transform_npn_truncation(mat_psi, na = "keep")
+  
+  expect_identical(which(is.na(mat_psi)),
+                   which(is.na(trans$mat)))
+  
+  trans_last <- transform_npn_truncation(mat_psi, na = "last")
+  
+  expect_identical(trans_last$mat[!is.na(mat_psi)],
+                   trans$mat[!is.na(mat_psi)])
+  
+})
+
 

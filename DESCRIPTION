@@ -1,6 +1,6 @@
 Package: projectNPN
 Title: Projection and Reverse Transformation for Nonparanormal and Zscore Transformations 
-Version: 0.0.5
+Version: 0.0.6
 Authors@R: 
     person("Alexis", "Weinreb", , "alexis.weinreb@yale.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3995-6072"))

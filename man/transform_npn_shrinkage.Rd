@@ -4,7 +4,11 @@
 \alias{transform_npn_shrinkage}
 \title{Transformation NPN by shrunken ECDF}
 \usage{
-transform_npn_shrinkage(mat, parameters = NULL, na = c("refuse", "last"))
+transform_npn_shrinkage(
+  mat,
+  parameters = NULL,
+  na = c("refuse", "last", "keep")
+)
 }
 \arguments{
 \item{mat}{The matrix to transform.}

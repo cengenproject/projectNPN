@@ -8,7 +8,7 @@ transform_npn_truncation(
   mat,
   parameters = NULL,
   trunc.thresh = NULL,
-  na = c("refuse", "last")
+  na = c("refuse", "last", "keep")
 )
 }
 \arguments{

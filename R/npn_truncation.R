@@ -20,7 +20,7 @@
 #' y <- matrix(c(12.2, 18), ncol = 1)
 #' x_transformed <- transform_npn_shrinkage(x)
 #' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
-transform_npn_truncation <- function(mat, parameters = NULL, trunc.thresh = NULL, na = c("refuse", "last")){
+transform_npn_truncation <- function(mat, parameters = NULL, trunc.thresh = NULL, na = c("refuse", "last", "keep")){
   
   na <- match.arg(na)
   if(na == "refuse" && any(is.na(mat))){
@@ -85,6 +85,9 @@ transform_npn_truncation <- function(mat, parameters = NULL, trunc.thresh = NULL
   
   mat_trans <- mat_trans/parameters$sd_first_col
   
+  if(na == "keep"){
+    mat_trans[is.na(mat)] <- NA
+  }
   
   list(mat = mat_trans, parameters = parameters)
 }

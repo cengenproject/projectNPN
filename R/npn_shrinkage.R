@@ -62,7 +62,7 @@ project_rank <- function(vec_to_transform, original_vec){
 #' y <- matrix(c(12.2, 18), ncol = 1)
 #' x_transformed <- transform_npn_shrinkage(x)
 #' y_transformed <- transform_npn_shrinkage(y, x_transformed$parameters)
-transform_npn_shrinkage <- function(mat, parameters = NULL, na = c("refuse", "last")){
+transform_npn_shrinkage <- function(mat, parameters = NULL, na = c("refuse", "last", "keep")){
   
   
   na <- match.arg(na)
@@ -110,6 +110,10 @@ transform_npn_shrinkage <- function(mat, parameters = NULL, na = c("refuse", "la
   }
   
   mat_trans = mat_trans/parameters$sd_first_col
+  
+  if(na == "keep"){
+    mat_trans[is.na(mat)] <- NA
+  }
   
   list(mat = mat_trans, parameters = parameters)
 }

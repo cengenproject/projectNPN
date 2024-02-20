@@ -132,17 +132,7 @@ test_that("Reverse rank projection as expected", {
 })
 
 
-
-
-test_that("Reverse NPN shrinkage reverses", {
-  mat_sf <- create_test_mat_sf()
-  
-  expect_identical(mat_sf |> transform_npn_shrinkage() |> do.call(reverse_npn_shrinkage, args = _),
-                   mat_sf)
-})
-
-
-test_that("NPN skrinkage case when NA but no right neighbor",{
+test_that("Reverse rank case when NA but no right neighbor",{
   # simple example
   y <- 69
   x <- c(NA, 60, 62)
@@ -166,6 +156,40 @@ test_that("NPN skrinkage case when NA but no right neighbor",{
   expect_identical(rev_transform_one_rank(y[[17]], x),
                    max(x, na.rm = TRUE))
 })
+
+
+test_that("Reverse NPN shrinkage reverses", {
+  mat_sf <- create_test_mat_sf()
+  
+  expect_identical(mat_sf |> transform_npn_shrinkage() |> do.call(reverse_npn_shrinkage, args = _),
+                   mat_sf)
+})
+
+
+test_that("Reverse NPN shrinkage with NA", {
+  mat_psi <- create_test_mat_psi()
+  
+  # default should error
+  expect_error(transform_npn_shrinkage(mat_psi),
+               "The matrix contains NA values.")
+  
+  # using keep
+  expect_no_error(transform_npn_shrinkage(mat_psi, na = "keep"))
+  
+  trans <- transform_npn_shrinkage(mat_psi, na = "keep")
+  
+  expect_identical(which(is.na(mat_psi)),
+                   which(is.na(trans$mat)))
+  
+  trans_last <- transform_npn_shrinkage(mat_psi, na = "last")
+  
+  expect_identical(trans_last$mat[!is.na(mat_psi)],
+                   trans$mat[!is.na(mat_psi)])
+  
+})
+
+
+
 
 
 
