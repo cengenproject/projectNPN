@@ -109,3 +109,33 @@ test_that("our parameters are taken into account",{
 })
 
 
+test_that("no NaN value when col sd is 0",{
+  
+  mat_sf <- create_test_mat_sf()
+  mat_sf[,4] <- 4
+  
+  res <- transform_zscore(mat_sf, na = "center")
+  
+  expect_length(which(is.nan(res$mat)), 0L)
+  expect_length(which(is.infinite(res$mat)), 0L)
+})
+
+
+test_that("no infinite value when sds in params is 0",{
+  
+  mat_sf_ref <- create_test_mat_sf()
+  mat_sf_ref[,4] <- 0
+  
+  mat_sf_ref_t <- transform_zscore(mat_sf_ref)
+  
+  mat_sf_secnd <- create_test_mat_sf()
+  
+  res <- transform_zscore(mat_sf_secnd,
+                          parameters = mat_sf_ref_t$parameters,
+                          na = "center")
+  
+  expect_length(which(is.infinite(res$mat)), 0L)
+})
+
+
+

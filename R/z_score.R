@@ -41,7 +41,9 @@ transform_zscore <- function(mat, parameters = NULL, na = c("refuse", "keep", "c
   if(!params_given) parameters$sds <- matrixStats::colSds(mat, na.rm = TRUE)
   mat <- sweep(mat, 2L, parameters$sds, `/`)
   
-  if(na == "center") mat[is.na(mat)] <- 0
+  if(na == "center"){
+    mat[is.na(mat) | is.infinite(mat)] <- 0
+  }
   
   list(mat = mat, parameters = parameters)
 }
